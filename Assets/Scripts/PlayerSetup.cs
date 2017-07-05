@@ -4,10 +4,8 @@ using UnityEngine.Networking;
 // cause this is a NetworkBehaviour class, we dont have to declare that NetworkIdentity is needed
 [RequireComponent(typeof(Player))]
 public class PlayerSetup : NetworkBehaviour {
-	// there are two kinds of players: host and client player. client player should have some component disabled
-//	[SerializeField]
-//	private Behaviour[] componentsToDisable;
 
+	// the camera to use when no player is spawned yet
 	private Camera sceneCamera;
 
 	// layer masking name for remote player
@@ -27,21 +25,21 @@ public class PlayerSetup : NetworkBehaviour {
 
 	void Start() {
 
+		DisableSceneCamera ();
+
 		if (!isLocalPlayer) { // player on the local machine (network related)
-//			DisableComponents();
+			
 			AssignRemoteLayer ();
 			// remote player's animator component has to be diabled, or it will override animation tranform info sended from server
 			if (playerAnimator != null)
 				playerAnimator.enabled = false;
-
-			// remote player disable player camera's audio
-			gameObject.GetComponentInChildren<AudioListener>().enabled = false;
+			
 		} else { 
-			// local player disable the main camera (not a good idea do it here)
-			DisableSceneCamera();
-
+			
 			// local player dont draw player except the gun
-			DontDrawPlayerExceptGunRecursively(graphicsWontBeDrawn, LayerMask.NameToLayer(DONT_DRAW_LAYER));
+			// why assign layer mask to a game object in code, rather than directionly in the prefabs?
+			// cause we dont want all of the game objects spawned by this prefab to be masked, only local game object
+			Utils.AssignLayerMaskToObjectAndChildren (graphicsWontBeDrawn, LayerMask.NameToLayer (DONT_DRAW_LAYER));
 
 			// local PLayer add the crosshair UI
 			crossHair = Instantiate(crossHairPrefab);
@@ -49,16 +47,6 @@ public class PlayerSetup : NetworkBehaviour {
 
 		}
 			
-	}
-
-	// why assign layer mask to a game object in code, rather than directionly in the prefabs?
-	// cause we dont want all of the game objects spawned by this prefab to be masked, only local game object
-	private void DontDrawPlayerExceptGunRecursively (GameObject obj, int mask) {
-		obj.layer = mask;
-		foreach (Transform child in obj.transform) {
-			DontDrawPlayerExceptGunRecursively (child.gameObject, mask);
-		}
-		
 	}
 
 	// register the player component of the object the current script component attached to
@@ -82,20 +70,13 @@ public class PlayerSetup : NetworkBehaviour {
 		gameObject.layer = LayerMask.NameToLayer(REMOTE_PLAYER_LAYER);
 	}
 
-	// disable the specified component of the client player
-//	void DisableComponents() {
-//		for (int i = 0; i < componentsToDisable.Length; i++) {
-//			componentsToDisable [i].enabled = false;
-//		}
-//	}
-
 	void DisableSceneCamera() {
 		sceneCamera = Camera.main;
 		if (sceneCamera != null) {
 			sceneCamera.gameObject.SetActive(false);
 		}
 	}
-
+		
 	void OnDisable() {
 		if (sceneCamera != null) {
 			sceneCamera.gameObject.SetActive(true);

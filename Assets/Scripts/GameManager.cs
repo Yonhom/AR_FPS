@@ -5,21 +5,19 @@ using UnityEngine;
 // a pool for all the references of the player in the game, it's for displaying info and get a specified player and do stuff with it;
 public class GameManager : MonoBehaviour {
 		
-	private const string PLAYER_ID_PREFIX = "PLAYER ";
-
 	private static Dictionary<string, Player> players = new Dictionary<string, Player> ();
 
 	public static void registerPlayer(string _playerId, Player player) {
 		// add the player to the dictionary
-		players.Add (PLAYER_ID_PREFIX + _playerId, player);
+		players.Add (Constants.PLAYER_ID_PREFIX + _playerId, player);
 		// modify the name of the gameobject this player script component attached to, 
 		// the name is used later for identifying player being shot
-		player.transform.name = PLAYER_ID_PREFIX + _playerId;
+		player.transform.name = Constants.PLAYER_ID_PREFIX + _playerId;
 	}
 
 	public static void unregisterPlayer(string _playerId) {
-		if (players.ContainsKey (PLAYER_ID_PREFIX + _playerId)) {
-			players.Remove (PLAYER_ID_PREFIX + _playerId);
+		if (players.ContainsKey (Constants.PLAYER_ID_PREFIX + _playerId)) {
+			players.Remove (Constants.PLAYER_ID_PREFIX + _playerId);
 		}
 	}
 

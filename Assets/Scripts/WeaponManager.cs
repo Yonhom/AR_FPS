@@ -1,18 +1,16 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 
+/** weapon collections and interface for get every info about the current weapon */
 [RequireComponent(typeof(PlayerWeapon))]
 public class WeaponManager : NetworkBehaviour {
 
 	private const string WEAPON_LAYER_MASK_NAME = "Weapon";
 
-	// remote weapon Camera to disable
-	[SerializeField]
-	private Camera weaponCamera;
-
 	// empty object for holding the weapon graphics
 	[SerializeField]
 	private GameObject weaponHolder;
+
 
 	// weapons info in the weapon manager
 	[SerializeField]
@@ -30,31 +28,33 @@ public class WeaponManager : NetworkBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
 		// set the first weapon in the weapon manager as the initial weapon
-		CurrentWeaponSetupWithIndex (0);
+		SetupCurrentWeaponWithIndex (0);
 		
 	}
 
 	/** for outer class to swap weapon */
-	public void CurrentWeaponSetupWithIndex(int index) {
+	public void SetupCurrentWeaponWithIndex(int index) {
 		GameObject weapon = InstantiateWeapon (weaponPrefabs [index], weaponHolder.transform);
 
 		SetCurrentWeapon (weapon, index);
 
-		if (isLocalPlayer) { // local player's weapon uses 'Weapon' mask, remote player's stays 'Default'
-			weapon.layer = LayerMask.NameToLayer (WEAPON_LAYER_MASK_NAME);
+		if (isLocalPlayer) { // local player's weapon and its children uses 'Weapon' mask, remote player's stays 'Default'
+			Utils.AssignLayerMaskToObjectAndChildren (weapon, 
+				LayerMask.NameToLayer (WEAPON_LAYER_MASK_NAME));
 		}
-
-		if (weaponCamera != null) {
-			if (!isLocalPlayer) { // local player's weapon uses 'Weapon' mask, remote player's stays 'Default'
-				weaponCamera.enabled = false;
-			}
-		}
+			
 	}
 
 	/** for outer class to retrive current weapon info */
 	public PlayerWeapon GetCurrentWeaponInfo() {
 		return currentWeaponInfo;
+	}
+
+	/** for outer class to retrive the current weapon instance, to add muzzle flash while shooting */
+	public GameObject GetCurrentWeapon() {
+		return currentWeapon;
 	}
 
 	// prefab to gameobject instance

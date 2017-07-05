@@ -9,9 +9,6 @@ public class PlayerMovement : NetworkBehaviour {
 
 	private float rotationSensitivity = Constants.ROTATION_SENSITIVITY;
 
-	[SerializeField]
-	private Camera cam;
-
 	// animator is referenced here to apply animation according player's movement
 	private Animator animator;
 
